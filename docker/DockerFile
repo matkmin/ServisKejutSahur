@@ -35,6 +35,18 @@ RUN apt-get update \
     && apt-get install -y cron supervisor \
     && crontab -l | { cat; echo "* * * * * cd /var/www/html && /usr/local/bin/php artisan schedule:run >> /dev/null 2>&1"; } | crontab - 
 
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application code
+COPY . .
+
+# Install dependencies
+RUN composer install --optimize-autoloader --no-dev --ignore-platform-req=ext-pcntl
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf        
 
-CMD /usr/bin/supervisord
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
