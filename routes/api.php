@@ -13,6 +13,10 @@ Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Api\AuthController
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
+Route::post('/email/resend', [App\Http\Controllers\Api\AuthController::class, 'resendVerification'])
+    ->middleware('throttle:6,1')
+    ->name('verification.resend');
+
 // Password Reset
 Route::post('/forgot-password', [App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLink']);
 Route::post('/reset-password', [App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
