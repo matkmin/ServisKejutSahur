@@ -31,6 +31,12 @@ class AuthController extends Controller
             ], 403);
         }
 
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Please verify your email address before logging in.',
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -86,9 +92,14 @@ class AuthController extends Controller
             'phone_number' => 'required|string|unique:users,phone_number',
             'referral_code' => 'required|string|exists:users,referral_code',
             'sahur_time' => 'required|date_format:H:i',
+            'email' => 'nullable|email',
+            'package' => 'nullable', // Expected to be JSON or array
         ]);
 
         $agent = User::where('referral_code', $validated['referral_code'])->first();
+
+        // Parse package data if it comes as string (from JSON.stringify in frontend)
+        $packageData = is_string($request->package) ? json_decode($request->package, true) : $request->package;
 
         $user = User::create([
             'name' => $validated['name'],
@@ -98,8 +109,9 @@ class AuthController extends Controller
             'admin_id' => $agent->id,
             'sahur_time' => $validated['sahur_time'],
             'status' => 'active',
-            'email' => $validated['phone_number'] . '@member.kejut',
-            'package' => $validated['package'] ?? 'asas',
+            'email' => $validated['email'] ?? ($validated['phone_number'] . '@member.kejut'), // Use provided email or fallback
+            'package' => $packageData['base'] ?? 'asas',
+            'add_on' => $packageData['addons'] ?? [],
         ]);
 
         return response()->json([

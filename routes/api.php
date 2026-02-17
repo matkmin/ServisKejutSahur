@@ -13,6 +13,10 @@ Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Api\AuthController
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
+// Password Reset
+Route::post('/forgot-password', [App\Http\Controllers\Api\PasswordResetController::class, 'sendResetLink']);
+Route::post('/reset-password', [App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/verification-notification', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();

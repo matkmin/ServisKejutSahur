@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'sahur_time',
         'status',
         'package',
+        'add_on',
     ];
 
     public function admin()

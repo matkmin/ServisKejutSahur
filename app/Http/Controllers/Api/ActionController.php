@@ -12,14 +12,14 @@ class ActionController extends Controller
     {
         $validated = $request->validate([
             'member_id' => 'required|exists:users,id',
-            'action' => 'required|in:call,whatsapp',
+            'action_type' => 'required|in:call,whatsapp',
             'status' => 'required|string', // e.g., 'initiated', 'completed'
         ]);
 
         $log = \App\Models\ActionLog::create([
             'agent_id' => $request->user()->id,
             'member_id' => $validated['member_id'],
-            'action_type' => $validated['action'],
+            'action_type' => $validated['action_type'],
             'status' => $validated['status'],
         ]);
 
