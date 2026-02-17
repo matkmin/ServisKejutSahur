@@ -1,0 +1,9 @@
+.env
+.git
+.github
+.phpunit.cache
+node_modules
+vendor
+npm-debug.log
+yarn-error.log
+storage/*.key
