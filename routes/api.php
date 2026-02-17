@@ -3,9 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register/agent', [App\Http\Controllers\Api\AuthController::class, 'registerAgent']);
-Route::post('/register/member', [App\Http\Controllers\Api\AuthController::class, 'registerMember']);
-Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+Route::post('/register/agent', [App\Http\Controllers\Api\AuthController::class, 'registerAgent'])->middleware('throttle:10,1');
+Route::post('/register/member', [App\Http\Controllers\Api\AuthController::class, 'registerMember'])->middleware('throttle:10,1');
+Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:10,1');
 Route::get('/agent/lookup', [App\Http\Controllers\Api\AuthController::class, 'lookupAgent']);
 
 // Email Verification (Public because user clicks link from email)
