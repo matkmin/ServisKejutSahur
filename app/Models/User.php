@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'status',
         'package',
         'add_on',
+        'last_completed_at',
     ];
 
     public function admin()
@@ -61,6 +62,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_completed_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

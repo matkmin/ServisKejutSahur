@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Action Logging
     Route::post('/agent/action-log', [App\Http\Controllers\Api\ActionController::class, 'logAction']);
     Route::post('/agent/member/{id}/toggle-payment', [App\Http\Controllers\Api\AuthController::class, 'togglePaymentStatus']);
+    Route::post('/agent/member/{id}/toggle-complete', [App\Http\Controllers\Api\ActionController::class, 'toggleComplete']);
 
     // QR Upload
     Route::post('/agent/upload-qr', [App\Http\Controllers\Api\AuthController::class, 'uploadQr']);
