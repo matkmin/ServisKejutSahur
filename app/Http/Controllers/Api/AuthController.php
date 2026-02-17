@@ -46,6 +46,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|unique:users,phone_number',
             'password' => 'required|string|min:6',
+            'email' => 'required|email|unique:users,email',
         ]);
 
         // Generate unique referral code
@@ -64,13 +65,15 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'agent',
             'referral_code' => $referralCode,
-            'email' => $validated['phone_number'] . '@kejut.sahur',
+            'email' => $validated['email'],
         ]);
+
+        $user->sendEmailVerificationNotification();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Agent registered successfully',
+            'message' => 'Agent registered successfully. Please check your email for verification.',
             'user' => $user,
             'token' => $token,
         ]);
@@ -96,12 +99,33 @@ class AuthController extends Controller
             'sahur_time' => $validated['sahur_time'],
             'status' => 'active',
             'email' => $validated['phone_number'] . '@member.kejut',
+            'package' => $validated['package'] ?? 'asas',
         ]);
 
         return response()->json([
             'message' => 'Member registered successfully',
             'user' => $user,
             'agent' => $agent->name,
+        ]);
+    }
+
+    public function lookupAgent(Request $request)
+    {
+        $request->validate([
+            'referral_code' => 'required|string'
+        ]);
+
+        $agent = User::where('referral_code', $request->referral_code)
+            ->where('role', 'agent')
+            ->first();
+
+        if (!$agent) {
+            return response()->json(['message' => 'Agent not found'], 404);
+        }
+
+        return response()->json([
+            'name' => $agent->name,
+            'payment_qr' => $agent->payment_qr,
         ]);
     }
 
@@ -200,5 +224,40 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'No QR Code to delete'], 400);
+    }
+
+    public function togglePaymentStatus(Request $request, $id)
+    {
+        $agent = $request->user();
+        $member = User::where('id', $id)->where('admin_id', $agent->id)->first();
+
+        if (!$member) {
+            return response()->json(['message' => 'Member not found'], 404);
+        }
+
+        $member->payment_status = $member->payment_status === 'paid' ? 'pending' : 'paid';
+        $member->save();
+
+        return response()->json([
+            'message' => 'Payment status updated',
+            'member' => $member
+        ]);
+    }
+
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        $user = User::findOrFail($id);
+
+        if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            return response()->json(['message' => 'Invalid verification link.'], 403);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect(env('FRONTEND_URL', 'http://localhost:3001') . '/dashboard/agent?verified=1');
+        }
+
+        $user->markEmailAsVerified();
+
+        return redirect(env('FRONTEND_URL', 'http://localhost:3001') . '/dashboard/agent?verified=1');
     }
 }
