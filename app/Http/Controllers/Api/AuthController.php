@@ -113,7 +113,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($request->user()->load('admin'));
     }
     public function getMembers(Request $request)
     {
@@ -151,5 +151,54 @@ class AuthController extends Controller
     {
         $request->user()->unreadNotifications->markAsRead();
         return response()->json(['message' => 'Notifications marked as read']);
+    }
+
+    public function uploadQr(Request $request)
+    {
+        $request->validate([
+            'payment_qr' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->hasFile('payment_qr')) {
+            // Delete old QR if exists
+            if ($user->payment_qr && \Illuminate\Support\Facades\Storage::exists('public/' . $user->payment_qr)) {
+                \Illuminate\Support\Facades\Storage::delete('public/' . $user->payment_qr);
+            }
+
+            $path = $request->file('payment_qr')->store('qr-codes', 'public');
+            $user->payment_qr = $path;
+            $user->save();
+
+            return response()->json([
+                'message' => 'QR Code uploaded successfully',
+                'payment_qr' => $path,
+                'user' => $user
+            ]);
+        }
+
+        return response()->json(['message' => 'No file uploaded'], 400);
+    }
+
+    public function deleteQr(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->payment_qr) {
+            if (\Illuminate\Support\Facades\Storage::exists('public/' . $user->payment_qr)) {
+                \Illuminate\Support\Facades\Storage::delete('public/' . $user->payment_qr);
+            }
+
+            $user->payment_qr = null;
+            $user->save();
+
+            return response()->json([
+                'message' => 'QR Code deleted successfully',
+                'user' => $user
+            ]);
+        }
+
+        return response()->json(['message' => 'No QR Code to delete'], 400);
     }
 }

@@ -25,6 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Action Logging
     Route::post('/agent/action-log', [App\Http\Controllers\Api\ActionController::class, 'logAction']);
+
+    // QR Upload
+    Route::post('/agent/upload-qr', [App\Http\Controllers\Api\AuthController::class, 'uploadQr']);
+    Route::delete('/agent/upload-qr', [App\Http\Controllers\Api\AuthController::class, 'deleteQr']);
 });
 
 // Test Route (Public for simulation ease, or protected)
