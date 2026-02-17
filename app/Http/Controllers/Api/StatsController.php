@@ -68,4 +68,9 @@ class StatsController extends Controller
             'breakdown' => $breakdown,
         ]);
     }
+    public function publicStats()
+    {
+        $totalUsers = User::where('role', 'user')->count();
+        return response()->json(['total_users' => $totalUsers]);
+    }
 }

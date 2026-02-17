@@ -28,6 +28,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'admin_id',
         'sahur_time',
         'status',
+        'payment_status',
+        'latitude',
+        'longitude',
         'package',
         'add_on',
         'last_completed_at',
@@ -64,6 +67,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_completed_at' => 'datetime',
             'password' => 'hashed',
+            'add_on' => 'array',
         ];
     }
 }

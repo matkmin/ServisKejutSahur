@@ -114,6 +114,16 @@ class AuthController extends Controller
             'add_on' => $packageData['addons'] ?? [],
         ]);
 
+        // Notify Agent via Email
+        if ($agent->email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($agent->email)->send(new \App\Mail\NewMemberNotification($user, $agent));
+            } catch (\Exception $e) {
+                // Log error but don't fail registration
+                \Illuminate\Support\Facades\Log::error('Failed to send new member email to agent: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'message' => 'Member registered successfully',
             'user' => $user,

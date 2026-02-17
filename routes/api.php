@@ -43,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/agent/member/{id}/toggle-payment', [App\Http\Controllers\Api\AuthController::class, 'togglePaymentStatus']);
     Route::post('/agent/member/{id}/toggle-complete', [App\Http\Controllers\Api\ActionController::class, 'toggleComplete']);
 
+    // Location
+    Route::post('/agent/location', [App\Http\Controllers\Api\LocationController::class, 'update']);
+    Route::get('/agent/ip-location', [App\Http\Controllers\Api\LocationController::class, 'getIpLocation']);
+
     // QR Upload
     Route::post('/agent/upload-qr', [App\Http\Controllers\Api\AuthController::class, 'uploadQr']);
     Route::delete('/agent/upload-qr', [App\Http\Controllers\Api\AuthController::class, 'deleteQr']);
@@ -53,3 +57,6 @@ Route::post('/test/trigger-reminders', function () {
     \Illuminate\Support\Facades\Artisan::call('app:send-sahur-reminders');
     return response()->json(['message' => 'Reminders triggered successfully']);
 });
+
+// Public Stats
+Route::get('/public/stats', [App\Http\Controllers\Api\StatsController::class, 'publicStats']);
