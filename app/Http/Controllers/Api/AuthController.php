@@ -31,11 +31,12 @@ class AuthController extends Controller
             ], 403);
         }
 
-        if (!$user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Please verify your email address before logging in.',
-            ], 403);
-        }
+        // TEMPORARY: Disable email verification check
+        // if (!$user->hasVerifiedEmail()) {
+        //     return response()->json([
+        //         'message' => 'Please verify your email address before logging in.',
+        //     ], 403);
+        // }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -72,14 +73,16 @@ class AuthController extends Controller
             'role' => 'agent',
             'referral_code' => $referralCode,
             'email' => $validated['email'],
+            'email_verified_at' => now(), // TEMPORARY: Auto-verify email
         ]);
 
-        $user->sendEmailVerificationNotification();
+        // TEMPORARY: Disable sending verification email
+        // $user->sendEmailVerificationNotification();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Agent registered successfully. Please check your email for verification.',
+            'message' => 'Agent registered successfully. Login now.',
             'user' => $user,
             'token' => $token,
         ]);
