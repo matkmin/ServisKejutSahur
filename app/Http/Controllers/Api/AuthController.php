@@ -130,7 +130,8 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Member registered successfully',
             'user' => $user,
-            'agent' => $agent->name,
+            'agent_name' => $agent->name,
+            'agent_phone' => $agent->phone_number,
         ]);
     }
 
