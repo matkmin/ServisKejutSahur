@@ -62,5 +62,33 @@ Route::post('/test/trigger-reminders', function () {
     return response()->json(['message' => 'Reminders triggered successfully']);
 });
 
+Route::get('/debug/storage', function (Request $request) {
+    $path = $request->query('path');
+    $publicStorage = public_path('storage');
+    $storageAppPublic = storage_path('app/public');
+
+    $info = [
+        'symlink_exists' => file_exists($publicStorage),
+        'symlink_is_link' => is_link($publicStorage),
+        'symlink_target' => is_link($publicStorage) ? readlink($publicStorage) : null,
+        'storage_app_public_exists' => file_exists($storageAppPublic),
+        'storage_app_public_perms' => substr(sprintf('%o', fileperms($storageAppPublic)), -4),
+        'files_in_storage_root' => scandir($storageAppPublic),
+        'app_url' => env('APP_URL'),
+        'asset_url' => asset('storage/' . ($path ?? 'test.txt')),
+    ];
+
+    if ($path) {
+        $fullPath = $storageAppPublic . '/' . $path;
+        $info['file_check'] = [
+            'path' => $fullPath,
+            'exists' => file_exists($fullPath),
+            'perms' => file_exists($fullPath) ? substr(sprintf('%o', fileperms($fullPath)), -4) : null,
+        ];
+    }
+
+    return response()->json($info);
+});
+
 // Public Stats
 Route::get('/public/stats', [App\Http\Controllers\Api\StatsController::class, 'publicStats']);
